@@ -10,3 +10,9 @@ router.get('/', (req, res, next) => {
   .then(transactions => res.json(transactions))
   .catch(next);
 });
+
+router.post('/', (req, res, next) => {
+  Transaction.create()
+  .then(transactions => res.json(transactions))
+  .catch(next);
+});
