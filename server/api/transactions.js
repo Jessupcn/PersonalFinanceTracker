@@ -16,3 +16,9 @@ router.post('/', (req, res, next) => {
   .then(transactions => res.json(transactions))
   .catch(next);
 });
+
+router.put('/', (req, res, next) => {
+  Transaction.findAll()
+  .then(transactions => res.json(transactions))
+  .catch(next);
+});
