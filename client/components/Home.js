@@ -1,12 +1,16 @@
 import React, { Component } from 'react'
+
 /**
  * COMPONENT
  */
 
-export class Home extends Component {
+ class Home extends Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {
+      transactions: [],
+      showForm: false,
+    }
   }
 
   render() {
@@ -19,3 +23,5 @@ export class Home extends Component {
     )
   }
 }
+
+export default Home;

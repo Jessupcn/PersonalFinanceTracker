@@ -1,5 +1,5 @@
 const User = require('./user');
-const Transaction = require('./transation');
+const Transaction = require('./transaction');
 
 /**
  * If we had any associations to make, this would be a great place to put them!

@@ -9,99 +9,74 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const db = require('./db');
 const sessionStore = new SequelizeStore({db});
 const PORT = process.env.PORT || 8080;
-const app = express();
 
-module.exports = app
-
-/**
- * In your development environment, you can keep all of your
- * app's secret API keys in a file called `secrets.js`, in your project
- * root. This file is included in the .gitignore - it will NOT be tracked
- * or show up on Github. On your production server, you can add these
- * keys as environment variables, so that they can still be read by the
- * Node process on process.env
- */
-if (process.env.NODE_ENV !== 'production') require('../secrets')
-
-// passport registration
-passport.serializeUser((user, done) => done(null, user.id))
+// register passport
+passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) =>
-  db.models.user.findById(id)
+  db.models.user
+    .findById(id)
     .then(user => done(null, user))
-    .catch(done))
+    .catch(done)
+);
 
-const createApp = () => {
-  // logging middleware
-  app.use(morgan('dev'))
+// create express.js app
+const app = express();
+module.exports = app;
 
-  // body parsing middleware
-  app.use(bodyParser.json())
-  app.use(bodyParser.urlencoded({ extended: true }))
+// sync database
+db.sync().then(() => console.log('Database is synced'));
 
-  // compression middleware
-  app.use(compression())
+// logging middleware
+app.use(morgan('dev'));
 
-  // session middleware with passport
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'my best friend is Cody',
+// body parsing middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// compression middleware
+app.use(compression());
+
+// session middleware with passport
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'this is a secret session shh',
     store: sessionStore,
     resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 600000 }
-  }))
-  app.use(passport.initialize())
-  app.use(passport.session())
+    saveUninitialized: false
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-  // session middleware to create a cart
-  app.use((req, res, next) => {
-    if (!req.session.cart) {
-      req.session.cart = {}
-    }
+// auth and api routes
+app.use('/auth', require('./auth'));
+app.use('/api', require('./api'));
+
+// static file-serving middleware
+app.use(express.static(path.join(__dirname, '..', 'Public')));
+
+// send 404 for other extensions
+app.use((req, res, next) => {
+  if (path.extname(req.path).length) {
+    const err = new Error('Not found');
+    err.status = 404;
+    next(err);
+  } else {
     next();
-  })
+  }
+});
 
-  // auth and api routes
-  app.use('/auth', require('./auth'))
-  app.use('/api', require('./api'))
+// sends index.html
+app.use('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'Public/index.html'));
+});
 
-  // static file-serving middleware
-  app.use(express.static(path.join(__dirname, '..', 'public')))
+// error handling endware
+app.use((err, req, res, next) => {
+  console.error(err);
+  console.error(err.stack);
+  res.status(err.status || 500).send(err.message || 'Internal server error.');
+});
 
-  // any remaining requests with an extension (.js, .css, etc.) send 404
-  app.use((req, res, next) => {
-    if (path.extname(req.path).length) {
-      const err = new Error('Not found')
-      err.status = 404
-      next(err)
-    } else {
-      next()
-    }
-  })
-
-  // sends index.html
-  app.use('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public/index.html'))
-  })
-
-  // error handling endware
-  app.use((err, req, res, next) => {
-    console.error(err)
-    console.error(err.stack)
-    res.status(err.status || 500).send(err.message || 'Internal server error.')
-  })
-};
-
-const syncDb = () => db.sync()
-
-// This evaluates as true when this file is run directly from the command line,
-// i.e. when we say 'node server/index.js' (or 'nodemon server/index.js', or 'nodemon server', etc)
-// It will evaluate false when this module is required by another module - for example,
-// if we wanted to require our app in a test spec
-if (require.main === module) {
-  sessionStore.sync()
-    .then(syncDb)
-    .then(createApp)
-    .then(startListening)
-} else {
-  createApp()
-}
+// app listening on a port
+app.listen(PORT, () => console.log(`Server online at port ${PORT}`));

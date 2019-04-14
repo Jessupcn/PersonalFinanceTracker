@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const db = require('../db');
 
 //define the Product model
-const Product = db.define('product', {
+const Transaction = db.define('transaction', {
   title: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -17,7 +17,7 @@ const Product = db.define('product', {
     allowNull: false
   },
   category: {
-    type: Sequelize.ENUM,
+    type: Sequelize.BOOLEAN,
     allowNull: false
   }
 }, {
@@ -28,4 +28,4 @@ const Product = db.define('product', {
   }
 })
 
-module.exports = Product
+module.exports = Transaction;

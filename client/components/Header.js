@@ -3,7 +3,7 @@ import React, { Component } from 'react'
  * COMPONENT
  */
 
-export class Header extends Component {
+class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -18,3 +18,5 @@ export class Header extends Component {
     )
   }
 }
+
+export default Header;

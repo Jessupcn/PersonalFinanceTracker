@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { withRouter, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
+
+import { Home } from './components';
 
 /**
  * COMPONENT
  */
 class Routes extends Component {
   componentDidMount() {
-    this.props.loadInitialData();
+    // this.props.loadInitialData();
   }
 
   render() {
@@ -20,3 +22,5 @@ class Routes extends Component {
     );
   }
 }
+
+export default Routes;
